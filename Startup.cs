@@ -36,6 +36,13 @@ namespace DatingApp.API
             //Cors for allowing API calls cross domain
             services.AddCors();
 
+            //Single instance of the repository using singleton for concurrent requests, just create once
+            //AddTransient is useful for creating each time it is requested, lightweight services
+            //AddScoped, creates the instance once per scope
+            //This will inject the IAuthRepository would be injected on all controllers
+            services.AddScoped<IAuthRepository, AuthRepository>();
+
+
             services.AddControllers();
         }
 
