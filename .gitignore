@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+#Leave apsettings outside the scope so no upload of it to github
+#security breach of security token
+appsettings.json
