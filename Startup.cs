@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,6 +41,19 @@ namespace DatingApp.API
             services.AddDbContext<DataContext>(x => 
             x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
+            //Newtonsoft to get json responses in a proper format
+            //Got a loop error Newtonsoft.Json.Serialization.JsonSerializerInternalWriter.CheckForCircularReference so 
+            //fix it telling it to ignore the error
+            services.AddControllers().AddNewtonsoftJson(opt =>
+            {
+                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
+            //Automapper injected to use mapping between normal clases and DTOs to present filtered data from DB
+            //This gives error for ambiguous callings, so next line solves it telling it which assembly to use
+            //services.AddAutoMapper();
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
+
             //Cors for allowing API calls cross domain
             services.AddCors();
 
@@ -48,6 +62,8 @@ namespace DatingApp.API
             //AddScoped, creates the instance once per scope
             //This will inject the IAuthRepository would be injected on all controllers
             services.AddScoped<IAuthRepository, AuthRepository>();
+
+            services.AddScoped<IDatingRepository, DatingRepository>();
 
             //Add authorization as a service so the controllers know how to deal with authorization attribute [Authorize]
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {

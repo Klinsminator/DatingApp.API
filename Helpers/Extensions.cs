@@ -19,5 +19,18 @@ namespace DatingApp.API.Helpers
             response.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
             response.Headers.Add("Access-Control-Allow-Origin", "*");
         }
+
+        public static int CalculateAge(this DateTime theDateTime)
+        {
+            //This would be an extension method to the datetime class of C# so can calculate the age of a user
+
+            var age = DateTime.Today.Year - theDateTime.Year;
+
+            //dapending on day of birth may not be correct so will check birthday
+            if (theDateTime.AddYears(age) > DateTime.Today)
+                age--;
+
+            return age;
+        }
     }
 }
