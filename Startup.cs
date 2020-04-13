@@ -78,8 +78,14 @@ namespace DatingApp.API
                 };
             });
 
+            //Service to link Cloudinary settings from appsettings to the class
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
+
 
             services.AddControllers();
+
+            // Because need to create a new instance of the pull request
+            services.AddScoped<LogUserActivity>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

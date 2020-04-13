@@ -1,4 +1,5 @@
-﻿using DatingApp.API.Data;
+﻿using AutoMapper;
+using DatingApp.API.Data;
 using DatingApp.API.Dtos;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,11 +23,13 @@ namespace DatingApp.API.Controllers
     {
         private readonly IAuthRepository _repo;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
-        public AuthController(IAuthRepository repo, IConfiguration config)
+        public AuthController(IAuthRepository repo, IConfiguration config, IMapper mapper)
         {
             _repo = repo;
             _config = config;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -43,17 +46,21 @@ namespace DatingApp.API.Controllers
             if (await _repo.UserExists(userForRegisterDto.Username))
                 return BadRequest("Username already in use");
 
-            var userToCreate = new User
-            {
-                Username = userForRegisterDto.Username
-            };
+            // This code was for manually fill data, now changing it for using automapper
+            //var userToCreate = new User
+            //{
+            //    Username = userForRegisterDto.Username
+            //};
+
+            var userToCreate = _mapper.Map<User>(userForRegisterDto);
 
             var createdUser = await _repo.Register(userToCreate, userForRegisterDto.Password);
 
             //Send back the location of the entity and the entity
             //return CreatedAtRoute();
+            var userToReturn = _mapper.Map<UserForDetailedDto>(createdUser);
 
-            return StatusCode(201);
+            return CreatedAtRoute("GetUser", new { controller = "Users", id = createdUser.Id },userToReturn);
         }
 
         [HttpPost("login")]
@@ -77,7 +84,7 @@ namespace DatingApp.API.Controllers
             //With the token on appsettings can create a signing credentials
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            //security token descriptor which contains the claims and signing credentials
+            //Security token descriptor which contains the claims and signing credentials
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
@@ -89,9 +96,15 @@ namespace DatingApp.API.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
+            //Need to display the image on the navbar, which cannot take from the apitkoken, nor from
+            //the list of photos that the page handles, so the final way is to sent id alongside the
+            //token, not in it...
+            var user = _mapper.Map<UserForListDto>(userFromRepo);
+
             return Ok(new
             {
-                token = tokenHandler.WriteToken(token)
+                token = tokenHandler.WriteToken(token),
+                user
             });
         }
     }

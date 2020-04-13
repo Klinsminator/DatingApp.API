@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace DatingApp.API.Models
+namespace DatingApp.API.Dtos
 {
-    public class Photo
+    public class PhotoForReturnDto
     {
         public int Id { set; get; }
 
@@ -14,10 +17,7 @@ namespace DatingApp.API.Models
 
         public bool IsMain { set; get; }
 
-        public User User { set; get; }
-
-        public int UserId { set; get; }
-
+        //This is used because cloudinary is involved
         public string PublicId { set; get; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace DatingApp.API.Helpers
             response.Headers.Add("Application-Error", message);
             
             //Next two headers allow the first one to be displayed
-            //Cors header so Angular doesn't kdeal with it, given that doesn't count with appropiate access control...
+            //Cors header so Angular doesn't deal with it, given that doesn't count with appropiate access control...
             response.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
             response.Headers.Add("Access-Control-Allow-Origin", "*");
         }
@@ -31,6 +33,16 @@ namespace DatingApp.API.Helpers
                 age--;
 
             return age;
+        }
+
+        public static void AddPagination(this HttpResponse response, int currentPage, int itemsPerPage, int totalItems, int totalPages)
+        {
+            var paginationHeader = new PaginationHeader(currentPage, itemsPerPage, totalItems, totalPages);
+            // Need camelcase for the header values in response
+            var camelcaseFormatter = new JsonSerializerSettings();
+            camelcaseFormatter.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            response.Headers.Add("Pagination", JsonConvert.SerializeObject(paginationHeader, camelcaseFormatter));
+            response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
         }
     }
 }

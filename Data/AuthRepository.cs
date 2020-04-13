@@ -18,7 +18,10 @@ namespace DatingApp.API.Data
 
         public async Task<User> Login(string username, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            //The Include(p => p.Photos) was added given that the photos object was not included into the variable..
+            //It can be seen on the inspect of browser, so it was not working for implmenting the photo into the navbar
+
+            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Username == username);
 
             if (user == null)
                 return null;
