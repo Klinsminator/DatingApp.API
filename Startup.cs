@@ -32,14 +32,32 @@ namespace DatingApp.API
 
         public IConfiguration Configuration { get; }
 
+        public void ConfigureDevelopmentServices(IServiceCollection services)
+        {
+            //This would tell when to use development db
+            services.AddDbContext<DataContext>(x =>
+            x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            ConfigureServices(services);
+        }
+
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
+            //This would tell when to use production db
+            services.AddDbContext<DataContext>(x =>
+            x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            ConfigureServices(services);
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             //add a service to be run for data connection
             //cmd>dotnet ef migrations add InitialCreate... That commmand creates the migration files
             //cmd>dotnet ef database update... That command uses migration files to create stuff on DB
-            services.AddDbContext<DataContext>(x => 
-            x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<DataContext>(x => 
+            //x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             //Newtonsoft to get json responses in a proper format
             //Got a loop error Newtonsoft.Json.Serialization.JsonSerializerInternalWriter.CheckForCircularReference so 
@@ -126,9 +144,17 @@ namespace DatingApp.API
 
             app.UseAuthorization();
 
+            // Adding support to static files
+            // Use default files inside wwwroot folder
+            app.UseDefaultFiles();
+
+            // Add the hability to use does files
+            app.UseStaticFiles();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
